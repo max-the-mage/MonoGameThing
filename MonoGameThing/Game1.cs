@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Diagnostics;
+using System;
 
 namespace MonoGameThing
 {
@@ -11,12 +13,20 @@ namespace MonoGameThing
 
         Texture2D playerTexture;
         Vector2 playerPosition;
+        CollisionManager playerCollsion;
         float playerSpeed;
 
         Texture2D bulletTexture;
         Vector2 bulletPosition;
+        CollisionManager bulletCollision;
         float bulletSpeed;
         string bulletDirection;
+
+        Texture2D enemyTexture;
+        Vector2 enemyPosition;
+        CollisionManager enemyCollision;
+
+        Random rnd = new Random();
 
         public Game1()
         {
@@ -34,9 +44,16 @@ namespace MonoGameThing
 
             playerPosition = new Vector2(graphics.PreferredBackBufferWidth / 2, graphics.PreferredBackBufferHeight / 2);
             playerSpeed = 150f;
+            playerCollsion = new CollisionManager(playerTexture,  playerPosition);
 
             bulletPosition = playerPosition;
             bulletSpeed = 450f;
+            bulletDirection = "";
+            bulletCollision = new CollisionManager(bulletTexture, bulletPosition);
+
+            enemyPosition.X = rnd.Next(1, graphics.PreferredBackBufferWidth);
+            enemyPosition.Y = rnd.Next(1, graphics.PreferredBackBufferHeight);
+            enemyCollision = new CollisionManager(enemyTexture, enemyPosition);
         }
 
         protected override void LoadContent()
@@ -46,6 +63,7 @@ namespace MonoGameThing
             // Loads in textures
             playerTexture = Content.Load<Texture2D>("player");
             bulletTexture = Content.Load<Texture2D>("bullet");
+            enemyTexture  = Content.Load<Texture2D>("enemy");
         }
 
         protected override void UnloadContent()
@@ -121,8 +139,22 @@ namespace MonoGameThing
                     bulletPosition.X += bulletSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
                     break;
                 default:
-                    bulletPosition = playerPosition;
+                    bulletPosition.X = playerPosition.X + playerTexture.Width / 2 - bulletTexture.Width / 2;
+                    bulletPosition.Y = playerPosition.Y + playerTexture.Height / 2 - bulletTexture.Height / 2;
                     break;
+            }
+
+            // Checks collision between the enemy and bullet
+
+            bulletCollision.UpdatePosition(bulletPosition);
+            enemyCollision.UpdatePosition(enemyPosition);
+            playerCollsion.UpdatePosition(playerPosition);
+
+            if(bulletCollision.CheckCollision(enemyCollision))
+            {
+                bulletDirection = "";
+                enemyPosition.X = rnd.Next(1, graphics.PreferredBackBufferWidth);
+                enemyPosition.Y = rnd.Next(1, graphics.PreferredBackBufferHeight);
             }
 
             base.Update(gameTime);
@@ -137,24 +169,17 @@ namespace MonoGameThing
             spriteBatch.Draw(
                 bulletTexture,
                 bulletPosition,
-                null,
-                Color.White,
-                0f,
-                new Vector2(bulletTexture.Width / 2, bulletTexture.Height / 2),
-                Vector2.One,
-                SpriteEffects.None,
-                0f
+                Color.White
             );
             spriteBatch.Draw(
                 playerTexture,
                 playerPosition,
-                null,
-                Color.White,
-                0f,
-                new Vector2(playerTexture.Width / 2, playerTexture.Height / 2),
-                Vector2.One,
-                SpriteEffects.None,
-                0f
+                Color.White
+            );
+            spriteBatch.Draw(
+                enemyTexture,
+                enemyPosition,
+                Color.White
             );
             spriteBatch.End();
             
