@@ -123,6 +123,19 @@ namespace MonoGameThing
                 bulletPosition.X > graphics.PreferredBackBufferWidth)
                 bulletDirection = "";
 
+            // Checks collision between the enemy and bullet
+
+            bulletCollision.UpdatePosition(bulletPosition);
+            enemyCollision.UpdatePosition(enemyPosition);
+            playerCollsion.UpdatePosition(playerPosition);
+
+            if (bulletCollision.CheckCollision(enemyCollision))
+            {
+                bulletDirection = "";
+                enemyPosition.X = rnd.Next(1, graphics.PreferredBackBufferWidth - enemyTexture.Width);
+                enemyPosition.Y = rnd.Next(1, graphics.PreferredBackBufferHeight - enemyTexture.Height);
+            }
+
             // Sets Bullet Direction
             switch (bulletDirection)
             {
@@ -142,19 +155,6 @@ namespace MonoGameThing
                     bulletPosition.X = playerPosition.X + playerTexture.Width / 2 - bulletTexture.Width / 2;
                     bulletPosition.Y = playerPosition.Y + playerTexture.Height / 2 - bulletTexture.Height / 2;
                     break;
-            }
-
-            // Checks collision between the enemy and bullet
-
-            bulletCollision.UpdatePosition(bulletPosition);
-            enemyCollision.UpdatePosition(enemyPosition);
-            playerCollsion.UpdatePosition(playerPosition);
-
-            if(bulletCollision.CheckCollision(enemyCollision))
-            {
-                bulletDirection = "";
-                enemyPosition.X = rnd.Next(1, graphics.PreferredBackBufferWidth);
-                enemyPosition.Y = rnd.Next(1, graphics.PreferredBackBufferHeight);
             }
 
             base.Update(gameTime);
